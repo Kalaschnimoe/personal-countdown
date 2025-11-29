@@ -3,7 +3,6 @@ package com.moeproductions.personalcountdown
 import android.os.Bundle
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.PreferenceManager
 import androidx.preference.SeekBarPreference
 
 class SettingsFragment : PreferenceFragmentCompat() {
@@ -25,13 +24,23 @@ class SettingsFragment : PreferenceFragmentCompat() {
             listener
 
         findPreference<Preference>("pref_specific_days")?.setOnPreferenceClickListener {
-            startActivity(android.content.Intent(requireContext(), SpecificDaysActivity::class.java))
+            val ctx = requireContext()
+            val intent = android.content.Intent(
+                ctx,
+                SpecificDaysActivity::class.java
+            )
+            startActivity(intent)
             true
         }
 
         updateSpecificDaysSummary()
     }
 
+    override fun onResume() {
+        super.onResume()
+        // Jedes Mal, wenn das Settings-Fragment wieder sichtbar wird,
+        updateSpecificDaysSummary()
+    }
     private fun updateSpecificDaysSummary() {
         val ctx = requireContext()
         val prefs = androidx.preference.PreferenceManager.getDefaultSharedPreferences(ctx)

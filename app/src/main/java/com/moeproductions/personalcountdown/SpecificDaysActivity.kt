@@ -1,14 +1,19 @@
 package com.moeproductions.personalcountdown
 
-import android.app.DatePickerDialog
 import android.os.Bundle
 import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.edit
 import androidx.core.view.isVisible
 import androidx.preference.PreferenceManager
 import java.text.SimpleDateFormat
 import java.util.*
-import androidx.core.content.edit
+import com.applandeo.materialcalendarview.CalendarView
+import com.applandeo.materialcalendarview.builders.DatePickerBuilder
+import com.applandeo.materialcalendarview.listeners.OnSelectDateListener
+import java.util.Calendar
+
 
 class SpecificDaysActivity : AppCompatActivity() {
 
@@ -17,82 +22,110 @@ class SpecificDaysActivity : AppCompatActivity() {
     private lateinit var saveBtn: Button
     private lateinit var emptyTv: TextView
 
-    private val iso = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-    private val pretty = SimpleDateFormat.getDateInstance(SimpleDateFormat.MEDIUM, Locale.getDefault())
+    private val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
 
-    private val items = sortedSetOf<String>() // ISO Strings, sortiert
+    // Set, das in den SharedPreferences gespeichert wird (keine Duplikate)
+    private val selectedDays = mutableSetOf<String>()
+
+    // Datenbasis für den Adapter
+    private val items = mutableListOf<String>()
+
+    private lateinit var adapter: ArrayAdapter<String>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(buildContentView())
-        title = "Spezifische Tage"
 
-        val appPrefs = PreferenceManager.getDefaultSharedPreferences(this)
-        val saved = appPrefs.getStringSet("pref_specific_days_set", emptySet()) ?: emptySet()
-        items.addAll(saved)
+        val root = buildContentView()
+        setContentView(root)
 
-        refreshList()
+        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
 
-        addBtn.setOnClickListener { showPicker() }
-        saveBtn.setOnClickListener {
-            // Persistieren
-            appPrefs.edit { putStringSet("pref_specific_days_set", items) }
-            // Widget refresh
-            WidgetUpdateReceiver.triggerNow(this)
-            WidgetUpdateReceiver.scheduleNextMinute(this)
-            finish()
-        }
+        // Vorhandene Tage aus den Settings laden
+        selectedDays.addAll(
+            prefs.getStringSet("pref_specific_days_set", emptySet()) ?: emptySet()
+        )
 
+        items.clear()
+        items.addAll(selectedDays.toList().sorted())
+
+        adapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_list_item_1,
+            items
+        )
+        listView.adapter = adapter
+        emptyTv.isVisible = items.isEmpty()
+
+        // Optional: Tag per Long-Klick aus der Liste löschen
         listView.setOnItemLongClickListener { _, _, position, _ ->
-            val key = items.elementAt(position)
-            items.remove(key)
-            refreshList()
+            val value = items[position]
+            selectedDays.remove(value)
+            updateList()
             true
         }
-    }
 
-    private fun showPicker() {
-        val now = Calendar.getInstance()
-        val appPrefs = getSharedPreferences("countdown_prefs", MODE_PRIVATE)
-        val targetMillis = appPrefs.getLong("target_date", -1L)
-
-        val maxCal = Calendar.getInstance()
-        if (targetMillis > 0) maxCal.timeInMillis = targetMillis
-
-        val dlg = DatePickerDialog(
-            this,
-            { _, y, m, d ->
-                val picked = Calendar.getInstance().apply {
-                    set(Calendar.YEAR, y); set(Calendar.MONTH, m); set(Calendar.DAY_OF_MONTH, d)
-                    set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
-                }.time
-                // Nur bis Zieltag zulassen (wenn gesetzt)
-                if (targetMillis > 0 && picked.time > targetMillis) {
-                    Toast.makeText(this, "Auswahl liegt nach dem Zieltermin.", Toast.LENGTH_SHORT).show()
-                    return@DatePickerDialog
-                }
-                items.add(iso.format(picked))
-                refreshList()
-            },
-            now.get(Calendar.YEAR),
-            now.get(Calendar.MONTH),
-            now.get(Calendar.DAY_OF_MONTH)
-        )
-        // min Date: heute
-        dlg.datePicker.minDate = System.currentTimeMillis()
-        // max Date: Ziel (falls gesetzt)
-        if (targetMillis > 0) dlg.datePicker.maxDate = targetMillis
-        dlg.show()
-    }
-
-    private fun refreshList() {
-        emptyTv.isVisible = items.isEmpty()
-        val prettyList = items.mapNotNull {
-            try { pretty.format(iso.parse(it)!!) } catch (_: Exception) { it }
+        addBtn.setOnClickListener {
+            openCalendarDialog()
         }
-        listView.adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, prettyList)
+
+        saveBtn.setOnClickListener {
+            prefs.edit {
+                putStringSet("pref_specific_days_set", selectedDays)
+            }
+            Toast.makeText(this, "Tage gespeichert", Toast.LENGTH_SHORT).show()
+            finish()
+        }
     }
 
+    /**
+     * Öffnet einen Dialog mit MaterialCalendarView für Mehrfachauswahl.
+     */
+    private fun openCalendarDialog() {
+        // Bestehende Tage (yyyy-MM-dd) -> List<Calendar> für Pre-Selection
+        val preselectedCalendars = selectedDays.mapNotNull { dateString ->
+            try {
+                val date = dateFormat.parse(dateString)
+                if (date != null) {
+                    Calendar.getInstance().apply { time = date }
+                } else null
+            } catch (e: Exception) {
+                null
+            }
+        }
+
+        val listener = object : OnSelectDateListener {
+            override fun onSelect(calendar: List<Calendar>) {
+                selectedDays.clear()
+                calendar.forEach { cal ->
+                    val str = dateFormat.format(cal.time)
+                    selectedDays.add(str)
+                }
+                updateList()
+            }
+        }
+
+        val builder = DatePickerBuilder(this, listener)
+            .pickerType(CalendarView.MANY_DAYS_PICKER)
+            .selectedDays(preselectedCalendars)
+
+        val dialog = builder.build()
+        dialog.show()
+    }
+
+
+    /**
+     * ListView aktualisieren, wenn sich selectedDays geändert hat.
+     */
+    private fun updateList() {
+        items.clear()
+        items.addAll(selectedDays.toList().sorted())
+        adapter.notifyDataSetChanged()
+        emptyTv.isVisible = items.isEmpty()
+    }
+
+    /**
+     * Einfaches Layout: Button oben, Text "Keine Tage...", Liste mit weight=1, Speichern-Button.
+     */
     private fun buildContentView(): LinearLayout {
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -100,13 +133,40 @@ class SpecificDaysActivity : AppCompatActivity() {
         }
         emptyTv = TextView(this).apply { text = "Keine Tage ausgewählt" }
         listView = ListView(this)
-        addBtn = Button(this).apply { text = "Datum hinzufügen" }
+        addBtn = Button(this).apply { text = "Datum auswählen" }
         saveBtn = Button(this).apply { text = "Speichern" }
 
-        root.addView(addBtn, LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-        root.addView(emptyTv, LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-        root.addView(listView, LinearLayout.LayoutParams.MATCH_PARENT, 0).apply { (this as LinearLayout.LayoutParams).weight = 1f }
-        root.addView(saveBtn, LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+        root.addView(
+            addBtn,
+            LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+        )
+        root.addView(
+            emptyTv,
+            LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+        )
+
+        val listParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            0
+        ).apply {
+            weight = 1f
+        }
+        root.addView(listView, listParams)
+
+        root.addView(
+            saveBtn,
+            LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+        )
+
         return root
     }
 }
