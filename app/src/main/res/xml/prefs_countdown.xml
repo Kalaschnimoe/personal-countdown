@@ -1,31 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <ListPreference
         android:key="pref_display_format"
         android:title="Anzeigeformat"
         android:entries="@array/pref_display_format_entries"
         android:entryValues="@array/pref_display_format_values"
-        android:defaultValue="DAYS_HH_MM" />
+        android:defaultValue="DAYS_HH_MM"
+        android:summary="%s" />
 
     <ListPreference
         android:key="pref_count_mode"
         android:title="Berechnungsmodus"
         android:entries="@array/pref_count_mode_entries"
         android:entryValues="@array/pref_count_mode_values"
-        android:defaultValue="TOTAL" />
+        android:defaultValue="TOTAL"
+        android:summary="%s" />
 
     <SeekBarPreference
         android:key="pref_working_days_per_week"
         android:title="Arbeitstage pro Woche"
         android:min="1"
         android:max="7"
-        android:defaultValue="5" />
+        android:defaultValue="5"
+        app:showSeekBarValue="true" />
 
     <Preference
         android:key="pref_specific_days"
         android:title="Spezifische Tage auswählen"
         android:summary="Keine Tage ausgewählt"
-        android:icon="@android:drawable/ic_menu_month"
-        android:dependency="pref_count_mode" />
+        android:icon="@android:drawable/ic_menu_month" />
+
 </PreferenceScreen>
