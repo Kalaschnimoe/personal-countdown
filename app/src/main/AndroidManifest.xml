@@ -27,6 +27,7 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".SpecificDaysActivity" />
         <activity android:name=".SettingsActivity" />
 
         <!-- Glance AppWidget-Receiver -->
