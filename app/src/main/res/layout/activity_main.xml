@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="20dp">
+
+    <EditText
+        android:id="@+id/titleInput"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="Event-Titel (z. B. Urlaub)"
+        android:imeOptions="actionDone"
+        android:singleLine="true"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/selectedDateText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Kein Ziel gesetzt"
+        android:textSize="14sp"
+        android:paddingTop="8dp"
+        app:layout_constraintTop_toBottomOf="@id/titleInput"
+        app:layout_constraintStart_toStartOf="@id/titleInput"
+        app:layout_constraintEnd_toEndOf="@id/titleInput" />
+
+    <LinearLayout
+        android:id="@+id/pickersRow"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:paddingTop="12dp"
+        app:layout_constraintTop_toBottomOf="@id/selectedDateText"
+        app:layout_constraintStart_toStartOf="@id/titleInput"
+        app:layout_constraintEnd_toEndOf="@id/titleInput">
+
+        <Button
+            android:id="@+id/pickDateButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="📅 Datum" />
+
+        <Space
+            android:layout_width="8dp"
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/pickTimeButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="⏰ Uhrzeit" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/presetsRow"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:paddingTop="8dp"
+        app:layout_constraintTop_toBottomOf="@id/pickersRow"
+        app:layout_constraintStart_toStartOf="@id/pickersRow"
+        app:layout_constraintEnd_toEndOf="@id/pickersRow">
+
+        <Button
+            android:id="@+id/presetToday"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Heute" />
+
+        <Space android:layout_width="8dp" android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/preset7"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="+7 Tage" />
+
+        <Space android:layout_width="8dp" android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/preset30"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="+30 Tage" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/countdownText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="—"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:paddingTop="24dp"
+        app:layout_constraintTop_toBottomOf="@id/presetsRow"
+        app:layout_constraintStart_toStartOf="@id/presetsRow"
+        app:layout_constraintEnd_toEndOf="@id/presetsRow" />
+
+    <Button
+        android:id="@+id/openSettingsButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="⚙️ Einstellungen"
+        app:layout_constraintTop_toBottomOf="@id/saveCloseButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="12dp" />
+
+    <LinearLayout
+        android:id="@+id/actionsRow"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:paddingTop="24dp"
+        app:layout_constraintTop_toBottomOf="@id/countdownText"
+        app:layout_constraintStart_toStartOf="@id/countdownText"
+        app:layout_constraintEnd_toEndOf="@id/countdownText">
+
+        <Button
+            android:id="@+id/shareButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Teilen" />
+
+        <Space android:layout_width="8dp" android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/resetButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Zurücksetzen" />
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/saveCloseButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Speichern und schließen"
+        app:layout_constraintTop_toBottomOf="@id/actionsRow"
+        app:layout_constraintStart_toStartOf="@id/actionsRow"
+        app:layout_constraintEnd_toEndOf="@id/actionsRow"
+        android:layout_marginTop="12dp"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+

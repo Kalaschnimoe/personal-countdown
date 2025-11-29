@@ -1,0 +1,23 @@
+<resources>
+    <string-array name="pref_display_format_entries">
+        <item>Tage HH:MM</item>
+        <item>Tage HHh MMmin</item>
+        <item>Nur Tage</item>
+    </string-array>
+    <string-array name="pref_display_format_values">
+        <item>DAYS_HH_MM</item>
+        <item>DAYS_HHh_MMmin</item>
+        <item>ONLY_DAYS</item>
+    </string-array>
+
+    <string-array name="pref_count_mode_entries">
+        <item>Gesamttage</item>
+        <item>Arbeitswochen/-tage</item>
+        <item>Spezifische Tage</item>
+    </string-array>
+    <string-array name="pref_count_mode_values">
+        <item>TOTAL</item>
+        <item>WORK</item>
+        <item>SPECIFIC</item>
+    </string-array>
+</resources>

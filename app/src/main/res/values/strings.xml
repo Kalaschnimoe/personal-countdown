@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Personal Countdown</string>
+    <string name="kein_datum_gew_hlt">Kein Datum gewählt</string>
+    <string name="datum_w_hlen">Datum wählen</string>
+    <string name="wird_geladen">Wird geladen…</string>
+    <string name="countdown_widget_description">Countdown Widget</string>
+</resources>
